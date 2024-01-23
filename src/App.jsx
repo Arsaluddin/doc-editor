@@ -1,35 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
-
-const socket = io('http://localhost:3001'); // Change the URL if your server runs on a different address
+import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { v4 as uuidV4 } from "uuid";
+import Login from "./Login"; 
+import TextEditor from "./TextEditor";
 
 function App() {
-  const [text, setText] = useState('');
-
-  useEffect(() => {
-    // Listen for text changes from the server
-    socket.on('text-change', (data) => {
-      setText(data);
-    });
-
-    // Cleanup on component unmount
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
-  const handleTextChange = (e) => {
-    const newText = e.target.value;
-    setText(newText);
-
-    // Emit text changes to the server
-    socket.emit('text-change', newText);
-  };
+  const [authenticated, setAuthenticated] = useState(false);
 
   return (
-    <div>
-      <textarea value={text} onChange={handleTextChange} />
-    </div>
+    <Router>
+      <Routes>
+        <Route
+          path="/"
+          element={authenticated ? <Navigate to={`/documents/${uuidV4()}`} /> : <Login setAuthenticated={setAuthenticated} />}
+        />
+        <Route path="/documents/:id" element={authenticated ? <TextEditor /> : <Navigate to="/" />} />
+      </Routes>
+    </Router>
   );
 }
 
