@@ -1,19 +1,19 @@
 const mongoose = require("mongoose");
 const express = require("express");
 const session = require("express-session");
-const passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
+const jwt = require('express-jwt');
+const bcrypt = require('bcrypt');
+const cors = require('cors');
+const User = require('./User');
 const Document = require("./Document");
 const dotenv = require("dotenv");
-const jwt = require('jsonwebtoken');
-const cors = require('cors');
 dotenv.config();
 
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server, {
   cors: {
-    origin: "http://localhost:5173", // Update with your frontend URL
+    origin: "http://localhost:5173", 
     methods: ["GET", "POST"],
   },
 });
@@ -24,53 +24,36 @@ mongoose.connect(process.env.URL);
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// User model (replace with your actual User model)
-const User = require('./User');
-
 app.use(cors());
-
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  next();
-});
-
-// Passport setup
-passport.use(new LocalStrategy(
-  (username, password, done) => {
-    User.findOne({ username: username }, (err, user) => {
-      if (err) { return done(err); }
-      if (!user) { return done(null, false, { message: 'Incorrect username.' }); }
-      if (!user.validPassword(password)) { return done(null, false, { message: 'Incorrect password.' }); }
-      return done(null, user);
-    });
-  }
-));
-
-app.use(passport.initialize());
 
 // User authentication routes
 app.post('/signup', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const newUser = new User({ username, password });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ username, password: hashedPassword });
     await newUser.save();
-    res.json({ message: 'Signup successful' });
+    res.json({user :newUser, message: 'Signup successful' });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ error: 'Signup failed' });
   }
 });
 
-app.post('/login', (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
-    if (err) { return next(err); }
-    if (!user) { return res.status(401).json({ message: 'Authentication failed' }); }
+app.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
 
-    // Generate JWT token on successful login
-    const token = jwt.sign({ userId: user._id }, 'your-secret-key', { expiresIn: '1h' }); // Replace 'your-secret-key' with your actual JWT secret
-    res.json({ user, token });
-  })(req, res, next);
+    if (!user) {
+      return res.status(401).json({ message: 'Authentication failed' });
+    }
+
+    res.json({ user :user, message: "login"});
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: 'Login failed' });
+  }
 });
 
 // Socket.IO connection handling
