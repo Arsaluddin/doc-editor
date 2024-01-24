@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { v4 as uuidV4 } from "uuid";
 import Login from "./Login"; 
 import TextEditor from "./TextEditor";
+import Signup from "./Signup";
 
 function App() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -14,7 +15,8 @@ function App() {
           path="/"
           element={authenticated ? <Navigate to={`/documents/${uuidV4()}`} /> : <Login setAuthenticated={setAuthenticated} />}
         />
-        <Route path="/documents/:id" element={authenticated ? <TextEditor /> : <Navigate to="/" />} />
+        <Route path="/signup" element={<Signup/>}/>
+        <Route path="/documents/:id" element={<TextEditor /> } />
       </Routes>
     </Router>
   );

@@ -1,16 +1,17 @@
+// Signup.jsx
 import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { v4 as uuidV4 } from "uuid";
+import "./styles.css"; // Import the CSS file
 
-const Login = ({ setAuthenticated }) => {
+const Signup = ({ setAuthenticated }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = async () => {
+  const handleSignup = async () => {
     try {
-      const response = await axios.post('http://localhost:5001/login', {
+      const response = await axios.post('http://localhost:5001/signup', {
         username: username,
         password: password,
       });
@@ -20,33 +21,42 @@ const Login = ({ setAuthenticated }) => {
       // Store the token in localStorage or as needed
       localStorage.setItem('token', token);
 
-      setAuthenticated(true);
       navigate(`/documents/${user._id}`);
     } catch (error) {
-      console.error('Login failed:', error.response?.data?.error || error.message);
+      console.error('Signup failed:', error.response?.data?.error || error.message);
     }
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <form>
-        <label>
+    <div className="signup-container">
+      <h2>Sign Up</h2>
+      <form className="signup-form">
+        <label className="form-label">
           Username:
-          <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="form-input"
+          />
         </label>
         <br />
-        <label>
+        <label className="form-label">
           Password:
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="form-input"
+          />
         </label>
         <br />
-        <button type="button" onClick={handleLogin}>
-          Login
+        <button type="button" onClick={handleSignup} className="form-button">
+          Sign Up
         </button>
       </form>
     </div>
   );
 };
 
-export default Login;
+export default Signup;

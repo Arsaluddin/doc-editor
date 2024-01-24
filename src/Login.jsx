@@ -1,7 +1,8 @@
+// Login.jsx
 import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { v4 as uuidV4 } from "uuid";
+import "./styles.css"; // Import the CSS file
 
 const Login = ({ setAuthenticated }) => {
   const navigate = useNavigate();
@@ -17,7 +18,6 @@ const Login = ({ setAuthenticated }) => {
 
       const { user, token } = response.data;
 
-      // Store the token in localStorage or as needed
       localStorage.setItem('token', token);
 
       setAuthenticated(true);
@@ -28,21 +28,34 @@ const Login = ({ setAuthenticated }) => {
   };
 
   return (
-    <div>
+    <div className="signup-container">
       <h2>Login</h2>
-      <form>
-        <label>
+      <form className="signup-form">
+        <label className="form-label">
           Username:
-          <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="form-input"
+          />
         </label>
         <br />
-        <label>
+        <label className="form-label">
           Password:
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="form-input"
+          />
         </label>
         <br />
-        <button type="button" onClick={handleLogin}>
+        <button type="button" onClick={handleLogin} className="form-button">
           Login
+        </button>
+        <button onClick={() => navigate('/signup')} className="form-button">
+          Sign up
         </button>
       </form>
     </div>
